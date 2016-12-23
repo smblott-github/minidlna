@@ -1252,7 +1252,7 @@ send_data(struct upnphttp * h, char * header, size_t size, int flags)
 }
 
 static void
-send_file(struct upnphttp * h, int sendfd, off_t offset, off_t end_offset)
+send_file(struct upnphttp * h, int sendfd, off_t offset, off_t end_offset, char *name, size_t size)
 {
 	off_t send_size;
 	off_t ret;
@@ -1264,7 +1264,8 @@ send_file(struct upnphttp * h, int sendfd, off_t offset, off_t end_offset)
 	while( offset <= end_offset )
 	{
 #if HAVE_SENDFILE
-		if( try_sendfile )
+                // Disable this.  To record whether we've SEEN a video, we need to see the individual parts being sent.
+		if( 0 && try_sendfile )
 		{
 			send_size = ( ((end_offset - offset) < MAX_BUFFER_SIZE) ? (end_offset - offset + 1) : MAX_BUFFER_SIZE);
 			ret = sys_sendfile(h->socket, sendfd, &offset, send_size);
@@ -1306,6 +1307,7 @@ send_file(struct upnphttp * h, int sendfd, off_t offset, off_t end_offset)
 				break;
 		}
 		offset += ret;
+                note_seen_status(name, offset, size);
 	}
 	free(buf);
 }
@@ -1435,7 +1437,7 @@ SendResp_albumArt(struct upnphttp * h, char * object)
 	if( send_data(h, str.data, str.off, MSG_MORE) == 0 )
 	{
 		if( h->req_command != EHead )
-			send_file(h, fd, 0, size-1);
+			send_file(h, fd, 0, size-1, 0, 0);
 	}
 	close(fd);
 	CloseSocket_upnphttp(h);
@@ -1481,7 +1483,7 @@ SendResp_caption(struct upnphttp * h, char * object)
 	if( send_data(h, str.data, str.off, MSG_MORE) == 0 )
 	{
 		if( h->req_command != EHead )
-			send_file(h, fd, 0, size-1);
+			send_file(h, fd, 0, size-1, 0, 0);
 	}
 	close(fd);
 	CloseSocket_upnphttp(h);
@@ -1977,9 +1979,8 @@ SendResp_dlnafile(struct upnphttp *h, char *object)
 		case 'i':
 			dlna_flags |= DLNA_FLAG_TM_I;
 			break;
-		case 'v':
-                        note_seen_status(last_file.path, h->req_RangeEnd, size);
 		case 'a':
+		case 'v':
 		default:
 			dlna_flags |= DLNA_FLAG_TM_S;
 			break;
@@ -2001,7 +2002,7 @@ SendResp_dlnafile(struct upnphttp *h, char *object)
 	if( send_data(h, str.data, str.off, MSG_MORE) == 0 )
 	{
 		if( h->req_command != EHead )
-			send_file(h, sendfh, offset, h->req_RangeEnd);
+			send_file(h, sendfh, offset, h->req_RangeEnd, last_file.path, size);
 	}
 	close(sendfh);
 
@@ -2031,6 +2032,7 @@ void note_seen_status(char *name, size_t end, size_t size) {
    if ( previous_name && strcmp(name, previous_name) == 0 )
       return;
 
+   fprintf(stderr, "abcd %d %s\n", (end * 100) / size, name);
    if ( SEEN_POSITION < (end * 100) / size ) {
       int ret = sql_exec(db, create_seenTable_sqlite);
       if ( ret  == SQLITE_OK ) {
