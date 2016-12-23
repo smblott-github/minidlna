@@ -628,7 +628,7 @@ parse_sort_criteria(char *sortCriteria, int *error)
 		}
 		else if( strcasecmp(item, "upnp:name") == 0 )
 		{
-			strcatf(&str, "d.NAME");
+			strcatf(&str, "d.PATH");
 		}
 		else
 		{
@@ -1352,6 +1352,7 @@ BrowseContentDirectory(struct upnphttp * h, const char * action)
 			}
 		}
 		/* If it's a DLNA client, return an error for bad sort criteria */
+
 		if( ret < 0 && ((args.flags & FLAG_DLNA) || GETFLAG(DLNA_STRICT_MASK)) )
 		{
 			SoapError(h, 709, "Unsupported or invalid sort criteria");
