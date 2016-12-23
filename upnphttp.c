@@ -101,7 +101,7 @@ static void SendResp_caption(struct upnphttp *, char * url);
 static void SendResp_resizedimg(struct upnphttp *, char * url);
 static void SendResp_thumbnail(struct upnphttp *, char * url);
 static void SendResp_dlnafile(struct upnphttp *, char * url);
-static void note_seen_status(char *name, int end, int size);
+static void note_seen_status(char *name, size_t end, size_t size);
 
 struct upnphttp * 
 New_upnphttp(int s)
@@ -2022,8 +2022,11 @@ char create_seenTable_sqlite[] = "CREATE TABLE IF NOT EXISTS SEEN ("
 #define SEEN_POSITION 90
 
 static
-void note_seen_status(char *name, int end, int size) {
+void note_seen_status(char *name, size_t end, size_t size) {
    static char *previous_name = 0;
+   // Prevent overflow.
+   end = end / 1000;
+   size = size / 1000;
    // Avoid repeatedly adding the same name.
    if ( previous_name && strcmp(name, previous_name) == 0 )
       return;
