@@ -2023,7 +2023,8 @@ char create_seenTable_sqlite[] = "CREATE TABLE IF NOT EXISTS SEEN ("
 #define SEEN_POSITION 90
 
 static
-void note_seen_status(char *name, size_t end, size_t size) {
+void note_seen_status(char *name, size_t end, size_t size)
+{
    static char *previous_name = 0;
    // Prevent overflow.
    end = end / 1000;
@@ -2032,9 +2033,11 @@ void note_seen_status(char *name, size_t end, size_t size) {
    if ( previous_name && strcmp(name, previous_name) == 0 )
       return;
 
-   if ( size && SEEN_POSITION < (end * 100) / size ) {
+   if ( size && SEEN_POSITION < (end * 100) / size )
+   {
       int ret = sql_exec(db, create_seenTable_sqlite);
-      if ( ret  == SQLITE_OK ) {
+      if ( ret == SQLITE_OK )
+      {
          char query[PATH_MAX + 128];
          snprintf(query, 8192, "INSERT INTO SEEN (NAME) values ('%s');", name);
          sql_exec(db, query);
