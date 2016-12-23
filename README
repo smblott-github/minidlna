@@ -5,6 +5,17 @@ Tweaks:
    - For the "force_sort_criteria" config option, you can also
      say "+upnp:name" to sort by the file name.
 
+   - Added a flag "-D" which *prevents* minidlna from daemonising, but
+     doesn't also turn onn all of the debug flags.
+
+   - For videos, video titles are marked with a leading "* " when more
+     than 90% of the video has been played.
+
+     For this to work, you need to also run ./script/mark-seen.py (with
+     the database name as an argument) from cron.
+
+There's a fair amount of hackery going on, so YMMV.
+
 Here's the original README...
 
 MiniDLNA project
