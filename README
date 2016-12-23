@@ -6,7 +6,7 @@ Tweaks:
      say "+upnp:name" to sort by the file name.
 
    - Added a flag "-D" which *prevents* minidlna from daemonising, but
-     doesn't also turn onn all of the debug flags.
+     doesn't also turn on all of the debug flags.
 
    - For videos, video titles are marked with a leading "* " when more
      than 90% of the video has been played.
