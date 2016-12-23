@@ -1,3 +1,12 @@
+This is just a copy of minidlna (1.1.5) with a couple of tweaks.
+
+Tweaks:
+
+   - For the "force_sort_criteria" config option, you can also
+     say "+upnp:name" to sort by the file name.
+
+Here's the original README...
+
 MiniDLNA project
 (c) 2009 Justin Maggard
 Portions (c) 2006-2007 Thomas Bernard
