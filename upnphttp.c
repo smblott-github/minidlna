@@ -101,6 +101,7 @@ static void SendResp_caption(struct upnphttp *, char * url);
 static void SendResp_resizedimg(struct upnphttp *, char * url);
 static void SendResp_thumbnail(struct upnphttp *, char * url);
 static void SendResp_dlnafile(struct upnphttp *, char * url);
+static void note_seen_status(char *name, int end, int size);
 
 struct upnphttp * 
 New_upnphttp(int s)
@@ -1976,12 +1977,14 @@ SendResp_dlnafile(struct upnphttp *h, char *object)
 		case 'i':
 			dlna_flags |= DLNA_FLAG_TM_I;
 			break;
-		case 'a':
 		case 'v':
+                        note_seen_status(last_file.path, h->req_RangeEnd, size);
+		case 'a':
 		default:
 			dlna_flags |= DLNA_FLAG_TM_S;
 			break;
 	}
+
 
 	if( h->reqflags & FLAG_CAPTION )
 	{
@@ -2009,4 +2012,31 @@ error:
 		_exit(0);
 #endif
 	return;
+}
+
+char create_seenTable_sqlite[] = "CREATE TABLE IF NOT EXISTS SEEN ("
+					"NAME TEXT NOT NULL"
+                                        ", UNIQUE(NAME)"
+					");";
+
+#define SEEN_POSITION 90
+
+static
+void note_seen_status(char *name, int end, int size) {
+   static char *previous_name = 0;
+   // Avoid repeatedly adding the same name.
+   if ( previous_name && strcmp(name, previous_name) == 0 )
+      return;
+
+   if ( SEEN_POSITION < (end * 100) / size ) {
+      int ret = sql_exec(db, create_seenTable_sqlite);
+      if ( ret  == SQLITE_OK ) {
+         char query[PATH_MAX + 128];
+         snprintf(query, 8192, "INSERT INTO SEEN (NAME) values ('%s');", name);
+         sql_exec(db, query);
+
+         if ( previous_name ) free(previous_name);
+         previous_name = strdup(name);
+      }
+   }
 }
