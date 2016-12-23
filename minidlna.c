@@ -490,6 +490,7 @@ init(int argc, char **argv)
 	int pid;
 	int debug_flag = 0;
 	int verbose_flag = 0;
+	int foreground_flag = 0;
 	int options_flag = 0;
 	struct sigaction sa;
 	const char * presurl = NULL;
@@ -802,6 +803,9 @@ init(int argc, char **argv)
 			else
 				DPRINTF(E_FATAL, L_GENERAL, "Option -%c takes one argument.\n", argv[i][1]);
 			break;
+                case 'D':
+                        foreground_flag = 1;
+                        break;
 		case 'd':
 			debug_flag = 1;
 		case 'v':
@@ -878,7 +882,7 @@ init(int argc, char **argv)
 	if (runtime_vars.port <= 0)
 	{
 		printf("Usage:\n\t"
-			"%s [-d] [-v] [-f config_file] [-p port]\n"
+			"%s [-d] [-D] [-v] [-f config_file] [-p port]\n"
 			"\t\t[-i network_interface] [-u uid_to_run_as]\n"
 			"\t\t[-t notify_interval] [-P pid_filename]\n"
 			"\t\t[-s serial] [-m model_number]\n"
@@ -895,6 +899,7 @@ init(int argc, char **argv)
 			"\t-h displays this text\n"
 			"\t-R forces a full rescan\n"
 			"\t-L do not create playlists\n"
+			"\t-D do not daemonize (but do not force debug either)\n"
 #ifdef __linux__
 			"\t-S changes behaviour for systemd\n"
 #endif
@@ -920,6 +925,10 @@ init(int argc, char **argv)
 		log_level = log_str;
 	}
 	else if (GETFLAG(SYSTEMD_MASK))
+	{
+		pid = getpid();
+	}
+	else if (foreground_flag)
 	{
 		pid = getpid();
 	}
