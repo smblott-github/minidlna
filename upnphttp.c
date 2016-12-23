@@ -2032,8 +2032,7 @@ void note_seen_status(char *name, size_t end, size_t size) {
    if ( previous_name && strcmp(name, previous_name) == 0 )
       return;
 
-   fprintf(stderr, "abcd %d %s\n", (end * 100) / size, name);
-   if ( SEEN_POSITION < (end * 100) / size ) {
+   if ( size && SEEN_POSITION < (end * 100) / size ) {
       int ret = sql_exec(db, create_seenTable_sqlite);
       if ( ret  == SQLITE_OK ) {
          char query[PATH_MAX + 128];
