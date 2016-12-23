@@ -2033,7 +2033,7 @@ void note_seen_status(char *name, size_t end, size_t size)
    if ( previous_name && strcmp(name, previous_name) == 0 )
       return;
 
-   if ( size && SEEN_POSITION < (end * 100) / size )
+   if ( size && SEEN_POSITION < (end * 100) / size && ! sql_get_text_field(db, "select NAME from SEEN where NAME = '%s';", name) )
    {
       int ret = sql_exec(db, create_seenTable_sqlite);
       if ( ret == SQLITE_OK )
